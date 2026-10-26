@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+.venv311/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+
+# User accounts database
+data/users.db
+data/users.db-journal
+
+# Generated analysis files
+data/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db

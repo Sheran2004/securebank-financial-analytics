@@ -1,0 +1,8 @@
+pandas
+mysql-connector-python
+scikit-learn
+streamlit
+plotly
+python-dotenv
+SQLAlchemy
+pwdlib[argon2]
