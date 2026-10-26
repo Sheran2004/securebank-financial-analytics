@@ -26,6 +26,24 @@ if not render_auth():
 
 render_logout()
 
+# Ensure sidebar is visible
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebar"] {
+            display: block !important;
+            visibility: visible !important;
+            transform: translateX(0) !important;
+        }
+        [data-testid="stSidebarCollapsedControl"] {
+            display: block !important;
+            visibility: visible !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "anomaly_results.csv"
 
