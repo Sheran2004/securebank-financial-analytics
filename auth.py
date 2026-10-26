@@ -199,26 +199,31 @@ def render_auth():
 
 
 def render_logout():
-    """Clear user session data and log out safely."""
+    """Display account details and logout button at the top."""
 
     user = st.session_state.get("user")
 
     if user:
-        st.sidebar.caption(f"Logged in as: {user['email']}")
+        left, right = st.columns([5, 1])
 
-        if st.sidebar.button("Logout", width="stretch"):
-            # Clear application session state.
-            # Keep Streamlit's internal widget keys intact.
-            keys_to_clear = [
-                key
-                for key in st.session_state.keys()
-                if key not in {"user"}
-            ]
+        with left:
+            st.caption(f"👤 Logged in as: {user['email']}")
 
-            for key in keys_to_clear:
-                del st.session_state[key]
+        with right:
+            if st.button(
+                "🚪 Logout",
+                key="top_logout_button",
+                type="secondary",
+                width="stretch",
+            ):
+                keys_to_clear = [
+                    key
+                    for key in st.session_state.keys()
+                    if key != "user"
+                ]
 
-            # Remove the authenticated user last.
-            st.session_state["user"] = None
+                for key in keys_to_clear:
+                    del st.session_state[key]
 
-            st.rerun()
+                st.session_state["user"] = None
+                st.rerun()
