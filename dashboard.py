@@ -231,7 +231,7 @@ if data_source == "Sample Data":
 else:
     current_user = st.session_state["user"]
 
-    uploaded_file = st.sidebar.file_uploader(
+    uploaded_file = st.file_uploader(
         "Upload transaction CSV",
         type=["csv"],
         key=f"transaction_upload_user_{current_user['id']}",
@@ -278,33 +278,40 @@ df = detect_anomalies(df)
 # FILTERS
 # =========================================================
 
-st.sidebar.divider()
-st.sidebar.header("🔎 Filters")
+st.subheader("🔎 Transaction Filters")
+
+filter_col1, filter_col2, filter_col3 = st.columns(3)
 
 cities = ["All"] + sorted(df["city"].dropna().unique().tolist())
 
-selected_city = st.sidebar.selectbox(
-    "City",
-    cities,
-)
+with filter_col1:
+    selected_city = st.selectbox(
+        "City",
+        cities,
+        key="main_city_filter",
+    )
 
 statuses = [
     "All"
 ] + sorted(df["transaction_status"].dropna().unique().tolist())
 
-selected_status = st.sidebar.selectbox(
-    "Transaction Status",
-    statuses,
-)
+with filter_col2:
+    selected_status = st.selectbox(
+        "Transaction Status",
+        statuses,
+        key="main_status_filter",
+    )
 
 anomalies = [
     "All"
 ] + sorted(df["anomaly_status"].dropna().unique().tolist())
 
-selected_anomaly = st.sidebar.selectbox(
-    "Anomaly Status",
-    anomalies,
-)
+with filter_col3:
+    selected_anomaly = st.selectbox(
+        "Anomaly Status",
+        anomalies,
+        key="main_anomaly_filter",
+    )
 
 filtered_df = df.copy()
 
@@ -323,6 +330,7 @@ if selected_anomaly != "All":
         filtered_df["anomaly_status"] == selected_anomaly
     ]
 
+st.divider()
 
 # =========================================================
 # KEY PERFORMANCE INDICATORS
