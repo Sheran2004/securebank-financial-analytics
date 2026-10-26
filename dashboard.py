@@ -205,12 +205,21 @@ st.info(
 # DATA SOURCE
 # =========================================================
 
-st.sidebar.header("📂 Transaction Data")
+st.subheader("📂 Transaction Data")
 
-data_source = st.sidebar.radio(
+data_source = st.radio(
     "Choose data source",
     ["Sample Data", "Upload CSV"],
+    horizontal=True,
+    key="main_data_source",
 )
+
+if data_source == "Upload CSV":
+    st.caption(
+        "CSV upload karein. Required columns: transaction_id, customer_name, "
+        "city, amount, merchant_category, transaction_status. "
+        "Maximum file size: 5 MB. Uploaded data automatically MySQL mein save nahi hota."
+    )
 
 df = None
 
@@ -265,6 +274,8 @@ else:
 if df is None or df.empty:
     st.warning("Display karne ke liye transaction data available nahi hai.")
     st.stop()
+
+st.divider()
 
 
 # =========================================================
