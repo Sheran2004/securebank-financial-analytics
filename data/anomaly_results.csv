@@ -1,0 +1,16 @@
+transaction_id,customer_name,city,risk_category,transaction_date,transaction_type,amount,merchant_category,transaction_status,anomaly_prediction,anomaly_status
+101,Aarav Sharma,Delhi,Low,2026-10-20 10:15:00,Debit,2500.0,Shopping,Success,1,Normal
+111,Aarav Sharma,Delhi,Low,2026-10-23 23:50:00,Debit,40000.0,Online Transfer,Success,1,Normal
+102,Priya Verma,Mumbai,Low,2026-10-20 11:30:00,Credit,15000.0,Salary,Success,1,Normal
+103,Rahul Singh,Lucknow,Medium,2026-10-21 02:15:00,Debit,45000.0,Online Transfer,Success,1,Normal
+112,Rahul Singh,Lucknow,Medium,2026-10-24 02:30:00,Debit,48000.0,Online Transfer,Success,1,Normal
+104,Neha Gupta,Noida,Low,2026-10-21 12:00:00,Debit,800.0,Food,Success,1,Normal
+105,Amit Kumar,Delhi,High,2026-10-21 14:20:00,Debit,95000.0,Jewellery,Success,-1,Unusual
+113,Amit Kumar,Delhi,High,2026-10-24 04:15:00,Debit,120000.0,Jewellery,Failed,-1,Unusual
+106,Sneha Patel,Ahmedabad,Medium,2026-10-22 09:45:00,Credit,20000.0,Business,Success,1,Normal
+107,Vikram Yadav,Jaipur,High,2026-10-22 03:10:00,Debit,28000.0,Online Transfer,Success,1,Normal
+114,Vikram Yadav,Jaipur,High,2026-10-24 11:20:00,Debit,1500.0,Food,Success,1,Normal
+108,Ananya Das,Kolkata,Low,2026-10-22 16:30:00,Debit,1200.0,Shopping,Success,1,Normal
+109,Rohan Mehta,Pune,Medium,2026-10-23 01:25:00,Debit,35000.0,ATM Withdrawal,Success,1,Normal
+115,Rohan Mehta,Pune,Medium,2026-10-25 00:45:00,Debit,65000.0,ATM Withdrawal,Success,1,Normal
+110,Kavya Rao,Hyderabad,Low,2026-10-23 13:15:00,Credit,12000.0,Refund,Success,1,Normal
