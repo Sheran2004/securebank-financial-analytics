@@ -26,30 +26,6 @@ if not render_auth():
 
 render_logout()
 
-# Keep the sidebar visible on the deployed app
-st.markdown(
-    """
-    <style>
-        [data-testid="stSidebar"] {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            min-width: 300px !important;
-            width: 300px !important;
-            transform: translateX(0) !important;
-        }
-
-        [data-testid="stSidebar"][aria-expanded="false"] {
-            display: flex !important;
-            visibility: visible !important;
-            min-width: 300px !important;
-            width: 300px !important;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "anomaly_results.csv"
 
