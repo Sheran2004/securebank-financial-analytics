@@ -17,6 +17,33 @@ st.set_page_config(
     layout="wide",
 )
 
+# Hide Streamlit's hosted-app chrome (GitHub/source controls and footer badge).
+st.markdown(
+    """
+    <style>
+        [data-testid="stHeader"] {
+            display: none !important;
+        }
+        [data-testid="stToolbar"] {
+            display: none !important;
+        }
+        [data-testid="stDecoration"] {
+            display: none !important;
+        }
+        [data-testid="stStatusWidget"] {
+            display: none !important;
+        }
+        [data-testid="stFooter"] {
+            display: none !important;
+        }
+        #MainMenu {
+            visibility: hidden !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # =========================================================
 # AUTHENTICATION
 # =========================================================
@@ -188,10 +215,35 @@ def detect_anomalies(df):
 # HEADER
 # =========================================================
 
-st.title("🔐 SecureBank Financial Analytics")
+st.markdown(
+    """
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:0.5rem;">
+      <svg width="54" height="54" viewBox="0 0 64 64" role="img"
+           aria-label="SecureBank logo" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="5" width="54" height="54" rx="14" fill="#123B5D"/>
+        <path d="M12 24 L32 13 L52 24 Z" fill="#FFFFFF"/>
+        <path d="M15 26 H49 V30 H15 Z" fill="#5CC8B2"/>
+        <rect x="17" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+        <rect x="29.5" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+        <rect x="42" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+        <path d="M12 47 H52 V51 H12 Z" fill="#5CC8B2"/>
+      </svg>
+      <span style="font-size:2.5rem;font-weight:700;line-height:1.2;">
+        SecureBank Financial Analytics
+      </span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.caption(
     "Financial Transaction Monitoring | Analytics | Anomaly Detection"
+)
+
+st.info(
+    "Educational analytics prototype. Unusual transaction ka matlab "
+    "confirmed fraud nahi hai. Analysis ke liye uploaded data process "
+    "kiya jata hai aur automatically MySQL mein save nahi hota."
 )
 
 
@@ -199,21 +251,12 @@ st.caption(
 # DATA SOURCE
 # =========================================================
 
-st.subheader("📂 Transaction Data")
+st.sidebar.header("📂 Transaction Data")
 
-data_source = st.radio(
+data_source = st.sidebar.radio(
     "Choose data source",
     ["Sample Data", "Upload CSV"],
-    horizontal=True,
-    key="main_data_source",
 )
-
-if data_source == "Upload CSV":
-    st.caption(
-        "CSV upload karein. Required columns: transaction_id, customer_name, "
-        "city, amount, merchant_category, transaction_status. "
-        "Maximum file size: 5 MB. Uploaded data automatically MySQL mein save nahi hota."
-    )
 
 df = None
 
@@ -268,8 +311,6 @@ else:
 if df is None or df.empty:
     st.warning("Display karne ke liye transaction data available nahi hai.")
     st.stop()
-
-st.divider()
 
 
 # =========================================================
