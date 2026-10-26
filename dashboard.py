@@ -194,12 +194,6 @@ st.caption(
     "Financial Transaction Monitoring | Analytics | Anomaly Detection"
 )
 
-st.info(
-    "Educational analytics prototype. Unusual transaction ka matlab "
-    "confirmed fraud nahi hai. Analysis ke liye uploaded data process "
-    "kiya jata hai aur automatically MySQL mein save nahi hota."
-)
-
 
 # =========================================================
 # DATA SOURCE
