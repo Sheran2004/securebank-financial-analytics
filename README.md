@@ -2,7 +2,16 @@
 
 ### Financial Transaction Monitoring & Anomaly Detection
 
+<p align="center">
+  <a href="https://securebank-financial-analytics-iipg98umtvqjmzxezkxucn.streamlit.app/">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Open_App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo">
+  </a>
+</p>
+
+**🔴 Live App:** https://securebank-financial-analytics-iipg98umtvqjmzxezkxucn.streamlit.app/
+
 A data analytics project that explores banking transactions using SQL and Python, identifies unusual transaction patterns using Machine Learning, and presents key financial insights through an interactive Streamlit dashboard.
+
 
 ## 📌 Project Overview
 
