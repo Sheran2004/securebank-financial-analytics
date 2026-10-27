@@ -154,7 +154,18 @@ if st.session_state.get("demo_mode", False) and st.session_state.get("user") is 
     st.caption("Demo only: illustrative figures, not real customer or bank records. No data is saved.")
     st.stop()
 
-render_logout()
+if st.session_state.get("guest_mode", False) and st.session_state.get("user") is None:
+    guest_left, guest_right = st.columns([5, 1])
+    with guest_left:
+        st.info("Guest mode · Use sample data or upload a CSV. Uploaded files are processed on the app server and are not automatically saved.")
+    with guest_right:
+        if st.button("← Exit Guest", key="exit_guest_mode", width="stretch"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.session_state["user"] = None
+            st.rerun()
+else:
+    render_logout()
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "anomaly_results.csv"
@@ -378,12 +389,17 @@ if data_source == "Sample Data":
         st.stop()
 
 else:
-    current_user = st.session_state["user"]
+    current_user = st.session_state.get("user")
+    uploader_key = (
+        f"transaction_upload_user_{current_user['id']}"
+        if current_user
+        else "transaction_upload_guest"
+    )
 
     uploaded_file = st.file_uploader(
         "Upload transaction CSV",
         type=["csv"],
-        key=f"transaction_upload_user_{current_user['id']}",
+        key=uploader_key,
         help=(
             "Required columns: transaction_id, customer_name, city, "
             "amount, merchant_category, transaction_status."

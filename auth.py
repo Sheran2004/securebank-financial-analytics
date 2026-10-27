@@ -101,7 +101,7 @@ def render_auth():
     initialize_auth_db()
     if "user" not in st.session_state:
         st.session_state["user"] = None
-    if st.session_state.get("demo_mode", False):
+    if st.session_state.get("demo_mode", False) or st.session_state.get("guest_mode", False):
         return True
     if st.session_state["user"] is not None:
         return True
@@ -125,6 +125,16 @@ def render_auth():
         unsafe_allow_html=True,
     )
     st.write("Sign in to access your financial analytics dashboard.")
+
+    with st.expander("How your CSV data is processed", expanded=True):
+        st.markdown(
+            """
+            - **Parsing and analysis:** CSV files are uploaded to the Streamlit app server, then parsed and analyzed there (not in your browser).
+            - **Storage:** Uploaded CSVs are processed in memory and are not automatically saved to the app's MySQL database. Avoid uploading sensitive real customer data.
+            - **Review the code:** [GitHub repository](https://github.com/Sheran2004/securebank-financial-analytics)
+            """
+        )
+
     login_tab, signup_tab = st.tabs(["Login", "Create Account"])
     with login_tab:
         with st.form("login_form"):
@@ -150,7 +160,15 @@ def render_auth():
             else:
                 st.error("Invalid email or password.")
 
-        st.caption("Want to preview the dashboard first?")
+        st.caption("Want to try the analytics without creating an account?")
+        if st.button(
+            "🧪 Continue as Guest",
+            key="continue_as_guest",
+            width="stretch",
+        ):
+            st.session_state["guest_mode"] = True
+            st.rerun()
+
         if st.button(
             "👁️ View Live Demo",
             key="view_live_demo",
