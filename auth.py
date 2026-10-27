@@ -21,16 +21,20 @@ def get_connection():
 
 
 def initialize_auth_db():
-    """Create the local user accounts table."""
     with get_connection() as connection:
-        connection.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                password_hash TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        # Existing users table creation yahan rahegi.
+
+        columns = {
+            row[1]
+            for row in connection.execute(
+                "PRAGMA table_info(users)"
+            ).fetchall()
+        }
+
+        if "totp_secret" not in columns:
+            connection.execute(
+                "ALTER TABLE users ADD COLUMN totp_secret TEXT"
             )
-        """)
 
 
 def validate_email(email):
