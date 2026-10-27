@@ -4,6 +4,7 @@ from pathlib import Path
 
 import streamlit as st
 from pwdlib import PasswordHash
+import pyotp
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -73,7 +74,7 @@ def authenticate(email, password):
     with get_connection() as connection:
         user = connection.execute(
             """
-            SELECT id, email, password_hash
+            SELECT id, email, password_hash, totp_secret
             FROM users
             WHERE email = ?
             """,
@@ -93,7 +94,17 @@ def authenticate(email, password):
     return {
         "id": user["id"],
         "email": user["email"],
+        "totp_secret": user["totp_secret"],
     }
+
+
+def save_totp_secret(email, secret):
+    """Persist an authenticator-app secret after the user verifies a code."""
+    with get_connection() as connection:
+        connection.execute(
+            "UPDATE users SET totp_secret = ? WHERE email = ?",
+            (secret, email),
+        )
 
 
 def render_auth():
@@ -147,6 +158,12 @@ def render_auth():
                 type="password",
                 key="login_password",
             )
+            login_otp = st.text_input(
+                "Authenticator code (if 2FA is enabled)",
+                max_chars=6,
+                key="login_otp",
+                help="Enter the 6-digit code from your authenticator app if you have already enabled 2FA.",
+            )
             login_submitted = st.form_submit_button(
                 "Login",
                 type="primary",
@@ -155,10 +172,47 @@ def render_auth():
         if login_submitted:
             user = authenticate(login_email, login_password)
             if user:
-                st.session_state["user"] = user
-                st.rerun()
+                if user["totp_secret"]:
+                    if pyotp.TOTP(user["totp_secret"]).verify(
+                        login_otp.strip(), valid_window=1
+                    ):
+                        st.session_state["user"] = user
+                        st.rerun()
+                    else:
+                        st.error("Enter a valid 6-digit authenticator code to finish signing in.")
+                else:
+                    st.session_state["pending_2fa_email"] = user["email"]
+                    st.session_state["pending_2fa_secret"] = pyotp.random_base32()
+                    st.info("Secure your account by setting up authenticator-app two-factor authentication below.")
             else:
                 st.error("Invalid email or password.")
+
+        st.markdown("[Terms of Service](https://github.com/Sheran2004/securebank-financial-analytics/blob/main/terms_of_service.md) · [GitHub repository](https://github.com/Sheran2004/securebank-financial-analytics)")
+
+        # Enroll accounts that do not yet have 2FA, then require a code on later logins.
+        pending_email = st.session_state.get("pending_2fa_email")
+        pending_secret = st.session_state.get("pending_2fa_secret")
+        if pending_email and pending_secret:
+            st.markdown("#### Set up two-factor authentication (2FA)")
+            st.write("In your authenticator app (for example, Google Authenticator or Microsoft Authenticator), add an account using this secret:")
+            st.code(pending_secret, language=None)
+            st.caption("Keep this secret private. Enter the current 6-digit code from the app to confirm setup.")
+            with st.form("confirm_2fa_setup_form"):
+                setup_code = st.text_input("6-digit verification code", max_chars=6, key="setup_2fa_code")
+                setup_submitted = st.form_submit_button("Verify and enable 2FA", type="primary", width="stretch")
+            if setup_submitted:
+                if pyotp.TOTP(pending_secret).verify(setup_code.strip(), valid_window=1):
+                    save_totp_secret(pending_email, pending_secret)
+                    st.session_state["user"] = {
+                        "email": pending_email,
+                        "totp_secret": pending_secret,
+                    }
+                    del st.session_state["pending_2fa_email"]
+                    del st.session_state["pending_2fa_secret"]
+                    st.success("Two-factor authentication enabled.")
+                    st.rerun()
+                else:
+                    st.error("That code is not valid. Check your authenticator app and try again.")
 
         st.caption("Want to try the analytics without creating an account?")
         if st.button(
