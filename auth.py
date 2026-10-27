@@ -101,6 +101,8 @@ def render_auth():
     initialize_auth_db()
     if "user" not in st.session_state:
         st.session_state["user"] = None
+    if st.session_state.get("demo_mode", False):
+        return True
     if st.session_state["user"] is not None:
         return True
 
@@ -147,6 +149,16 @@ def render_auth():
                 st.rerun()
             else:
                 st.error("Invalid email or password.")
+
+        st.caption("Want to preview the dashboard first?")
+        if st.button(
+            "👁️ View Live Demo",
+            key="view_live_demo",
+            width="stretch",
+        ):
+            st.session_state["demo_mode"] = True
+            st.rerun()
+
     with signup_tab:
         with st.form("signup_form"):
             signup_email = st.text_input(

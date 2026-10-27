@@ -51,6 +51,109 @@ st.markdown(
 if not render_auth():
     st.stop()
 
+# The public demo is read-only and uses illustrative mock data only.
+if st.session_state.get("demo_mode", False) and st.session_state.get("user") is None:
+    st.markdown(
+        """
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:0.5rem;">
+          <svg width="54" height="54" viewBox="0 0 64 64" role="img"
+               aria-label="SecureBank logo" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="5" width="54" height="54" rx="14" fill="#123B5D"/>
+            <path d="M12 24 L32 13 L52 24 Z" fill="#FFFFFF"/>
+            <path d="M15 26 H49 V30 H15 Z" fill="#5CC8B2"/>
+            <rect x="17" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+            <rect x="29.5" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+            <rect x="42" y="32" width="5" height="13" rx="1" fill="#FFFFFF"/>
+            <path d="M12 47 H52 V51 H12 Z" fill="#5CC8B2"/>
+          </svg>
+          <span style="font-size:2.5rem;font-weight:700;line-height:1.2;">
+            SecureBank Live Demo
+          </span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.caption("Read-only preview · All figures and transactions below are illustrative mock data.")
+    _, top_right = st.columns([5, 1])
+    with top_right:
+        if st.button("← Back to Login", key="demo_back_to_login", width="stretch"):
+            st.session_state["demo_mode"] = False
+            st.rerun()
+
+    demo_transactions = pd.DataFrame(
+        [
+            {"Transaction ID": "DEMO-1001", "Date": "2026-10-02", "Description": "Salary credit", "Category": "Income", "Amount (₹)": 85000, "Status": "Success"},
+            {"Transaction ID": "DEMO-1002", "Date": "2026-10-04", "Description": "House rent", "Category": "Housing", "Amount (₹)": -18000, "Status": "Success"},
+            {"Transaction ID": "DEMO-1003", "Date": "2026-10-06", "Description": "Groceries", "Category": "Food", "Amount (₹)": -6200, "Status": "Success"},
+            {"Transaction ID": "DEMO-1004", "Date": "2026-10-09", "Description": "Electricity bill", "Category": "Utilities", "Amount (₹)": -2400, "Status": "Success"},
+            {"Transaction ID": "DEMO-1005", "Date": "2026-10-12", "Description": "Online purchase", "Category": "Shopping", "Amount (₹)": -5100, "Status": "Success"},
+            {"Transaction ID": "DEMO-1006", "Date": "2026-10-15", "Description": "Freelance payment", "Category": "Income", "Amount (₹)": 12000, "Status": "Success"},
+            {"Transaction ID": "DEMO-1007", "Date": "2026-10-18", "Description": "Restaurant", "Category": "Food", "Amount (₹)": -1850, "Status": "Success"},
+            {"Transaction ID": "DEMO-1008", "Date": "2026-10-21", "Description": "ATM withdrawal", "Category": "Cash", "Amount (₹)": -3000, "Status": "Success"},
+            {"Transaction ID": "DEMO-1009", "Date": "2026-10-24", "Description": "Unusual transfer", "Category": "Transfer", "Amount (₹)": -25000, "Status": "Review"},
+        ]
+    )
+    monthly_summary = pd.DataFrame(
+        [
+            {"Month": "May", "Income": 76000, "Expenses": 39000, "Available Cash": 92000, "Net Worth": 420000},
+            {"Month": "Jun", "Income": 79000, "Expenses": 41500, "Available Cash": 99500, "Net Worth": 438000},
+            {"Month": "Jul", "Income": 81000, "Expenses": 43000, "Available Cash": 108000, "Net Worth": 455000},
+            {"Month": "Aug", "Income": 80000, "Expenses": 40500, "Available Cash": 119000, "Net Worth": 477000},
+            {"Month": "Sep", "Income": 84000, "Expenses": 44700, "Available Cash": 131000, "Net Worth": 501000},
+            {"Month": "Oct", "Income": 97000, "Expenses": 62550, "Available Cash": 150450, "Net Worth": 528000},
+        ]
+    )
+
+    metric1, metric2, metric3, metric4 = st.columns(4)
+    metric1.metric("Available Cash", "₹1,50,450")
+    metric2.metric("Monthly Income", "₹97,000")
+    metric3.metric("Monthly Expenses", "₹62,550")
+    metric4.metric("Estimated Net Worth", "₹5,28,000")
+
+    st.divider()
+    chart_left, chart_right = st.columns(2)
+    with chart_left:
+        st.subheader("Monthly Income vs Expenses")
+        income_expense = monthly_summary.melt(
+            id_vars="Month", value_vars=["Income", "Expenses"],
+            var_name="Type", value_name="Amount (₹)"
+        )
+        fig_monthly = px.bar(
+            income_expense, x="Month", y="Amount (₹)", color="Type",
+            barmode="group", title="Illustrative monthly cash flow"
+        )
+        st.plotly_chart(fig_monthly, width="stretch")
+    with chart_right:
+        st.subheader("Available Cash & Net Worth")
+        networth_data = monthly_summary.melt(
+            id_vars="Month", value_vars=["Available Cash", "Net Worth"],
+            var_name="Metric", value_name="Amount (₹)"
+        )
+        fig_networth = px.line(
+            networth_data, x="Month", y="Amount (₹)", color="Metric",
+            markers=True, title="Illustrative financial position"
+        )
+        st.plotly_chart(fig_networth, width="stretch")
+
+    st.subheader("Transaction Drill-Down")
+    selected_transaction = st.selectbox(
+        "Choose a mock transaction to inspect",
+        demo_transactions["Transaction ID"].tolist(),
+        key="demo_transaction_detail",
+    )
+    selected_row = demo_transactions.loc[
+        demo_transactions["Transaction ID"] == selected_transaction
+    ].iloc[0]
+    detail_cols = st.columns(4)
+    detail_cols[0].metric("Transaction ID", selected_row["Transaction ID"])
+    detail_cols[1].metric("Amount", f"₹{selected_row['Amount (₹)']:,.0f}")
+    detail_cols[2].metric("Category", selected_row["Category"])
+    detail_cols[3].metric("Status", selected_row["Status"])
+    st.write(f"**Description:** {selected_row['Description']}  ·  **Date:** {selected_row['Date']}")
+    st.dataframe(demo_transactions, width="stretch", hide_index=True)
+    st.caption("Demo only: illustrative figures, not real customer or bank records. No data is saved.")
+    st.stop()
+
 render_logout()
 
 BASE_DIR = Path(__file__).resolve().parent
