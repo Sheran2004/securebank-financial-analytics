@@ -1,6 +1,9 @@
 import re
 import sqlite3
+from io import BytesIO
 from pathlib import Path
+
+import qrcode
 
 import streamlit as st
 from pwdlib import PasswordHash
@@ -21,20 +24,23 @@ def get_connection():
 
 
 def initialize_auth_db():
+    """Create the local user accounts table."""
     with get_connection() as connection:
-        # Existing users table creation yahan rahegi.
-
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                password_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        # Safely migrate existing databases without deleting existing users.
         columns = {
             row[1]
-            for row in connection.execute(
-                "PRAGMA table_info(users)"
-            ).fetchall()
+            for row in connection.execute("PRAGMA table_info(users)").fetchall()
         }
-
         if "totp_secret" not in columns:
-            connection.execute(
-                "ALTER TABLE users ADD COLUMN totp_secret TEXT"
-            )
+            connection.execute("ALTER TABLE users ADD COLUMN totp_secret TEXT")
 
 
 def validate_email(email):
@@ -198,9 +204,18 @@ def render_auth():
         pending_secret = st.session_state.get("pending_2fa_secret")
         if pending_email and pending_secret:
             st.markdown("#### Set up two-factor authentication (2FA)")
-            st.write("In your authenticator app (for example, Google Authenticator or Microsoft Authenticator), add an account using this secret:")
-            st.code(pending_secret, language=None)
-            st.caption("Keep this secret private. Enter the current 6-digit code from the app to confirm setup.")
+            st.write("Scan this QR code with Google Authenticator, Microsoft Authenticator, or another TOTP-compatible app.")
+            otp_uri = pyotp.TOTP(pending_secret).provisioning_uri(
+                name=pending_email,
+                issuer_name="SecureBank",
+            )
+            qr_image = qrcode.make(otp_uri)
+            qr_buffer = BytesIO()
+            qr_image.save(qr_buffer, format="PNG")
+            st.image(qr_buffer.getvalue(), caption="SecureBank authenticator setup QR code", width=220)
+            with st.expander("Can't scan the QR code? Enter setup key manually"):
+                st.code(pending_secret, language=None)
+            st.caption("Keep the setup key private. Enter the current 6-digit code from your authenticator app to confirm setup.")
             with st.form("confirm_2fa_setup_form"):
                 setup_code = st.text_input("6-digit verification code", max_chars=6, key="setup_2fa_code")
                 setup_submitted = st.form_submit_button("Verify and enable 2FA", type="primary", width="stretch")
